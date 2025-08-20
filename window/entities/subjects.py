@@ -27,30 +27,34 @@ class Parent:
 
 
 class Child(Parent):
-    def __init__(self, parent, color):
+    def __init__(self, parent1, parent2, color):
         super().__init__(
             color=color,
-            coord=parent.coord,
-            speed=parent.speed,
-            friendliness=parent.friendliness,
-            aggression=parent.aggression,
-            mut_rate=parent.mut_rate,
-            pot_offspring=parent.pot_offspring
+            coord=((0, 0)),
+
+            ## p1
+            P1speed=parent1.speed,
+            P1friendliness=parent1.friendliness,
+            P1aggression=parent1.aggression,
+            P1mut_rate=parent1.mut_rate,
+            P1pot_offspring=parent1.pot_offspring,
+
+            ## p2
+            P2speed=parent1.speed,
+            P2friendliness=parent1.friendliness,
+            P2aggression=parent1.aggression,
+            P2mut_rate=        parent1.mut_rate,
+            P2pot_offspring=   parent1.pot_offspring
         )
 
         # Apply mutations
         self.apply_mutations()
 
     def apply_mutations(self):
-        # Mutate speed (0-100)
-        self.speed = max(0, min(100, self.speed + random.randint(-5, 5)))
-
-        # Mutate friendliness and aggression (0-1 float)
-        self.friendliness = min(1, max(0, self.friendliness + random.uniform(-self.mut_rate, self.mut_rate)))
-        self.aggression = min(1, max(0, self.aggression + random.uniform(-self.mut_rate, self.mut_rate)))
-
-        # Mutate mutation slightly (0-1)
-        self.mut_rate = min(1, max(0, self.mut_rate + random.uniform(-0.01, 0.01)))
+        self.speed = self.P1speed + self.P2speed
+        self.friendliness = self.P1friendliness + self.P2friendliness
+        self.aggression = self.P1aggression + self.p2aggression
+        self.mut_rate = self.P1mut_rate + self.P2_mut_rate
 
         # Mutate potential offspring
         self.set_offspring()
