@@ -17,14 +17,17 @@ except:
 parents = [
     Parent((150, 150), (255, 255, 255), speed=50, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
     Parent((200, 150), (255, 255, 255), speed=60, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
-    Parent((250, 150), (255, 255, 255), speed=40, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2)
+    Parent((250, 150), (255, 255, 255), speed=40, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2),
+    Parent((300, 150), (255, 255, 255), speed=50, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
+    Parent((350, 150), (255, 255, 255), speed=60, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
+    Parent((400, 150), (255, 255, 255), speed=40, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2)
 ]
 
 # Create children from parents
 children = [
-    Child(parents[0], (0, 255, 0)),
-    Child(parents[1], (0, 255, 0)),
-    Child(parents[2], (0, 255, 0)),
+    Child(parents[0], parents[1], (0, 255, 0)),
+    Child(parents[2], parents[3], (0, 255, 0)),
+    Child(parents[4], parents[5], (0, 255, 0)),
 ]
 
 # For printing

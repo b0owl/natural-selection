@@ -28,33 +28,41 @@ class Parent:
 
 class Child(Parent):
     def __init__(self, parent1, parent2, color):
+        # Store parent stats on the child
+        self.P1speed = parent1.speed
+        self.P1friendliness = parent1.friendliness
+        self.P1aggression = parent1.aggression
+        self.P1mut_rate = parent1.mut_rate
+        self.P1pot_offspring = parent1.pot_offspring
+
+        self.P2speed = parent2.speed
+        self.P2friendliness = parent2.friendliness
+        self.P2aggression = parent2.aggression
+        self.P2mut_rate = parent2.mut_rate
+        self.P2pot_offspring = parent2.pot_offspring
+
+        speed = self.P1speed + self.P2speed
+        friendliness = self.P1friendliness + self.P2friendliness
+        aggression = self.P1aggression + self.P2aggression
+        mut_rate = self.P1mut_rate + self.P2mut_rate
+        pot_offspring = self.P1pot_offspring + self.P2pot_offspring
+
         super().__init__(
+            speed=speed,
+            friendliness=friendliness,
+            aggression=aggression,
+            mut_rate=mut_rate,
+            pot_offspring=pot_offspring,
             color=color,
-            coord=((0, 0)),
-
-            ## p1
-            P1speed=parent1.speed,
-            P1friendliness=parent1.friendliness,
-            P1aggression=parent1.aggression,
-            P1mut_rate=parent1.mut_rate,
-            P1pot_offspring=parent1.pot_offspring,
-
-            ## p2
-            P2speed=parent2.speed,
-            P2friendliness=parent2.friendliness,
-            P2aggression=parent2.aggression,
-            P2mut_rate=parent2.mut_rate,
-            P2pot_offspring=parent2.pot_offspring
+            coord=(0, 0)
         )
 
-        # Apply mutations
         self.apply_mutations()
 
     def apply_mutations(self):
-        self.speed = self.P1speed + self.P2speed
-        self.friendliness = self.P1friendliness + self.P2friendliness
-        self.aggression = self.P1aggression + self.p2aggression
-        self.mut_rate = self.P1mut_rate + self.P2_mut_rate
-
-        # Mutate potential offspring
-        self.set_offspring()
+        import random
+        self.speed += random.randint(-1, 1)
+        self.friendliness += random.randint(-1, 1)
+        self.aggression += random.randint(-1, 1)
+        self.mut_rate += random.uniform(-0.01, 0.01)
+        self.pot_offspring += random.randint(-1, 1)
