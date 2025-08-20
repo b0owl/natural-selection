@@ -40,11 +40,11 @@ class Child(Parent):
             P1pot_offspring=parent1.pot_offspring,
 
             ## p2
-            P2speed=parent1.speed,
-            P2friendliness=parent1.friendliness,
-            P2aggression=parent1.aggression,
-            P2mut_rate=        parent1.mut_rate,
-            P2pot_offspring=   parent1.pot_offspring
+            P2speed=parent2.speed,
+            P2friendliness=parent2.friendliness,
+            P2aggression=parent2.aggression,
+            P2mut_rate=parent2.mut_rate,
+            P2pot_offspring=parent2.pot_offspring
         )
 
         # Apply mutations
