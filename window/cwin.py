@@ -1,9 +1,13 @@
 import pygame  # type: ignore
+import os
+
+# Set window position before creating it
+os.environ['SDL_VIDEO_WINDOW_POS'] = "0,30"
 
 pygame.init()
 
-background_color = (255, 255, 255)
-screen = pygame.display.set_mode((300, 300))
+background_color = (0, 0, 0)
+screen = pygame.display.set_mode((1030, 1000))
 pygame.display.set_caption('nats')  # natural selection
 screen.fill(background_color)
 
