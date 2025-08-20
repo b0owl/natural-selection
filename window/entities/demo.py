@@ -15,12 +15,12 @@ except:
 
 # Create parents
 parents = [
-    Parent((150, 150), (255, 255, 255), speed=50, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
-    Parent((200, 150), (255, 255, 255), speed=60, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
-    Parent((250, 150), (255, 255, 255), speed=40, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2),
-    Parent((300, 150), (255, 255, 255), speed=50, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
-    Parent((350, 150), (255, 255, 255), speed=60, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
-    Parent((400, 150), (255, 255, 255), speed=40, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2)
+    Parent((150, 150), (255, 255, 255), speed=5, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
+    Parent((200, 150), (255, 255, 255), speed=4, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
+    Parent((250, 150), (255, 255, 255), speed=2, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2),
+    Parent((300, 150), (255, 255, 255), speed=6, friendliness=0.5, aggression=0.5, mut_rate=0.1, pot_offspring=3),
+    Parent((350, 150), (255, 255, 255), speed=3, friendliness=0.3, aggression=0.7, mut_rate=0.2, pot_offspring=4),
+    Parent((400, 150), (255, 255, 255), speed=1, friendliness=0.7, aggression=0.4, mut_rate=0.05, pot_offspring=2)
 ]
 
 # Create children from parents
@@ -44,18 +44,24 @@ for idx, child in enumerate(children, start=1):
           f"aggression={child.aggression:.2f}, mut_rate={child.mut_rate:.2f}, "
           f"pot_offspring={child.pot_offspring}")
 
+import math
+
 def do(screen):
     for parent in parents:
-        dx = random.randint(-1, 5)
-        dy = random.randint(-1, 5)
+        angle = random.uniform(0, 2 * math.pi)  # random direction
+        dx = parent.speed * math.cos(angle)
+        dy = parent.speed * math.sin(angle)
         parent.move((dx, dy))
         parent.draw_circle(parent.color, 10, screen)
 
     for child in children:
-        dx = random.randint(-1, 5)
-        dy = random.randint(-1, 5)
+        angle = random.uniform(0, 2 * math.pi)
+        speed = child.speed
+        dx = speed * math.cos(angle)
+        dy = speed * math.sin(angle)
         child.move((dx, dy))
         child.draw_circle(child.color, 8, screen)
+
 
 
 startWin(do)

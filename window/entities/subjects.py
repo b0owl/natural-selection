@@ -54,15 +54,10 @@ class Child(Parent):
             mut_rate=mut_rate,
             pot_offspring=pot_offspring,
             color=color,
-            coord=(0, 0)
+            coord=(150, 150)
         )
 
         self.apply_mutations()
 
     def apply_mutations(self):
-        import random
-        self.speed += random.randint(-1, 1)
-        self.friendliness += random.randint(-1, 1)
-        self.aggression += random.randint(-1, 1)
-        self.mut_rate += random.uniform(-0.01, 0.01)
-        self.pot_offspring += random.randint(-1, 1)
+        pass
