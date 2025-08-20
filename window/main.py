@@ -46,24 +46,20 @@ def create_children():
 
 children = create_children()
 
-def create_food(amt, food_bounds_x, food_bounds_y):
+def create_food(amt, rect, buffer=0):
     FOOD = []
-    for food in range(amt):
-        # random position within screen bounds
-        x = random.randint(0, max(0, int(food_bounds_x) - 50))
-        y = random.randint(0, max(0, int(food_bounds_y) - 50))
-
+    for _ in range(amt):
+        x = random.randint(rect.left + buffer, rect.right - buffer - 30)  # 30 = food width
+        y = random.randint(rect.top  + buffer, rect.bottom - buffer - 30) # 30 = food height
 
         color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-
-        # fixed size (width, height)
         size = (30, 30)
-
         FOOD.append(subjects.Food(coords=(x, y), color=color, size=size))
-
     return FOOD
 
-food = create_food(20, 1500, 900)
+
+rect = pygame.Rect(20, 100, 1500, 800)
+food = create_food(3, rect, buffer=10)
 
 def do(screen):
     #---------------#

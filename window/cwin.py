@@ -1,5 +1,5 @@
 import pygame  # type: ignore
-import os
+import time 
 
 pygame.init()
 
@@ -10,7 +10,7 @@ screen.fill(background_color)
 
 running = True
 
-def startWin(do):  # main loop
+def startWin(do, delay=0):  # main loop
     global running
     clock = pygame.time.Clock()
     
@@ -23,3 +23,5 @@ def startWin(do):  # main loop
         do(screen)
         pygame.display.flip()
         clock.tick(60)
+
+        time.sleep(delay)
