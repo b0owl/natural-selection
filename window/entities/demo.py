@@ -52,7 +52,7 @@ def do(screen):
         dx = parent.speed * math.cos(angle)
         dy = parent.speed * math.sin(angle)
         parent.move((dx, dy))
-        parent.draw_circle(parent.color, 10, screen)
+        parent.draw(parent.color, 10, screen)
 
     for child in children:
         angle = random.uniform(0, 2 * math.pi)
@@ -60,7 +60,7 @@ def do(screen):
         dx = speed * math.cos(angle)
         dy = speed * math.sin(angle)
         child.move((dx, dy))
-        child.draw_circle(child.color, 8, screen)
+        child.draw(child.color, 8, screen)
 
 
 

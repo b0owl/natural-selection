@@ -3,13 +3,13 @@ import random
 
 class Parent:
     def __init__(self, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring):
-        self.coord         = coord
-        self.color         = color
-        self.speed         = speed
-        self.friendliness  = friendliness
-        self.aggression    = aggression
-        self.mut_rate      = mut_rate
-        self.pot_offspring = pot_offspring
+        self.coord         =coord
+        self.color         =color
+        self.speed         =speed
+        self.friendliness  =friendliness
+        self.aggression    =aggression
+        self.mut_rate      =mut_rate
+        self.pot_offspring =pot_offspring
 
         self.set_offspring()
 
@@ -22,7 +22,7 @@ class Parent:
         dx, dy = modifier
         self.coord = (x + dx, y + dy)
 
-    def draw_circle(self, color, size, screen):
+    def draw(self, color, size, screen):
         pygame.draw.circle(screen, color, self.coord, size)
 
 
@@ -61,3 +61,13 @@ class Child(Parent):
 
     def apply_mutations(self):
         pass
+
+class Food:
+    def __init__(self, coords, color, size):
+        self.coords = coords 
+        self.color  = color   
+        self.size   = size    
+
+    def draw(self, screen):
+        rect = pygame.Rect(self.coords[0], self.coords[1], self.size[0], self.size[1])
+        pygame.draw.rect(screen, self.color, rect)
