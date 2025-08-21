@@ -4,7 +4,10 @@ import math
 import cwin 
 import pygame 
 
-def create_parents(parents, max_speed, max_friendliess, max_aggersion, max_offspring, max_mut_rate, min_mut_rate, max_sight, rect):  
+def create_parents(parents, max_speed, 
+                   max_friendliess, max_aggersion, 
+                   max_offspring, max_mut_rate,
+                   min_mut_rate, min_sight, max_sight, rect):  
     PARENTS = []
 
     for _ in range(parents):
@@ -14,7 +17,7 @@ def create_parents(parents, max_speed, max_friendliess, max_aggersion, max_offsp
         aggression   = random.uniform(0, max_aggersion)
         pot_offspring = random.randint(0, max_offspring)
         mut_rate     = random.uniform(min_mut_rate, max_mut_rate)
-        sight        = random.uniform(1, max_sight)
+        sight        = random.uniform(min_sight, max_sight)
 
         # random starting position within rect
         x = random.randint(rect.left + 10, rect.right - 10)
@@ -34,20 +37,7 @@ def create_parents(parents, max_speed, max_friendliess, max_aggersion, max_offsp
     return PARENTS
 
 
-
-"""
- Takes args:
- parents                 -> set to 12
- max_speed               -> set to 5
- max_friendliess         -> set to 0.3
- max_aggresion           -> set to 0.3
- max_offspring           -> set to 2
- max_mut_rate            -> set to 0.5
- min_mut_rate            -> set to 0.1
- sight (in px)           -> set to 50
-"""
 rect = pygame.Rect(5, 100, 1500, 800)
-parents = create_parents(12, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, rect) # sorry for the magic numbers lmao
 
 def create_children():
     global parents 
@@ -68,7 +58,6 @@ def create_children():
 
     return CHILDREN
 
-children = create_children()
 
 def create_food(amt, rect, buffer=0):
     FOOD = []
@@ -82,12 +71,31 @@ def create_food(amt, rect, buffer=0):
     return FOOD
 
 
-food = create_food(10, rect, buffer=10)
 
 day = 1
-t_remaining = 60
+t_remaining = 15
 elapsed_time = 0  # tracks elapsed time
 dt = 0
+
+"""
+ Takes args:
+ parents                 -> set to 12
+ max_speed               -> set to 5
+ max_friendliess         -> set to 0.3
+ max_aggresion           -> set to 0.3
+ max_offspring           -> set to 2
+ max_mut_rate            -> set to 0.5
+ min_mut_rate            -> set to 0.1
+ min_sight               -> locked to sight
+ sight (in px)           -> set to 30
+
+ sorry if this is outdated lol, too lazy to change it whenever i change an arg
+"""
+parents = create_parents(100, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, 300, rect) # sorry for the magic numbers lmao
+food_to_generate = 200
+food = create_food(food_to_generate, rect, buffer=10)
+#children = create_children()
+children = []
 
 def child_cb(parent1, parent2, screen):
     child = subjects.Child(parent1, parent2, (0, 255, 0))
@@ -103,17 +111,11 @@ def child_cb(parent1, parent2, screen):
     return child
 
 def do(screen):  
-    global dt
+    global dt, food_to_generate, food
     global day, t_remaining, elapsed_time
 
-    # ----- update day timer -----
-    elapsed_time += dt
-    t_remaining -= dt
-    if t_remaining <= 0:
-        day += 1
-        t_remaining = 60
-        elapsed_time = 0
-
+    male = 0
+    female = 0
     color = (255, 255, 255)  # white
     buffer = 10
     pygame.draw.rect(screen, color, rect, width=2)
@@ -133,8 +135,8 @@ def do(screen):
         min_food_dist = float('inf')
         for f in food:
             food_center = (f.coords[0] + f.size[0] // 2, f.coords[1] + f.size[1] // 2)
-            dx_f = food_center[0] - parent.coord[0]
-            dy_f = food_center[1] - parent.coord[1]
+            dx_f = food_center[0] - parent.pos[0]
+            dy_f = food_center[1] - parent.pos[1]
             dist_f = (dx_f**2 + dy_f**2)**0.5
 
             if dist_f < parent.sight and dist_f < min_food_dist:
@@ -154,6 +156,13 @@ def do(screen):
             dy = parent.speed * random.uniform(-1, 1)
             target = None
 
+
+        # ----- check gender ----- 
+        if parent.gender == 'M':
+            male += 1
+        else:
+            female += 1
+
         # ----- calculate movement -----
         if target is not None:
             dx = target[0] - parent.coord[0]
@@ -165,13 +174,22 @@ def do(screen):
                 dx = (dx / distance) * parent.speed * attraction_strength
                 dy = (dy / distance) * parent.speed * attraction_strength
             else:
-                dx = dy = 0 # STOP MOVING
-                for i in range(0, len(parents)-1, 2):
-                    child = child_cb(parents[i], parents[i+1], screen)
-                    child.coord += (10, 10)
+                dx = dy = 0  # STOP MOVING
+                
+                # ----- mating -----
+                if mate is not None:
+                    if parent.gender != mate.gender and not parent.mated and parent.food_eaten_count >= 2:
+                        parent.has_mated()
+                        new_child = child_cb(parent, mate, screen)
+                        children.append(new_child)
+                        parent.coords = (rect.left, random.randint(0, 800))
+
                 # eat food if reached
                 if closest_food is not None and closest_food in food:
+                    parent.eaten()
                     food.remove(closest_food)
+
+
 
         # ----- update position -----
         x = min(max(parent.coord[0] + dx, rect.left + buffer), rect.right - buffer)
@@ -180,11 +198,116 @@ def do(screen):
 
         # draw parent
         parent.draw(parent.color, 10, screen)
+            
+    # ----- update children -----
+    for child in children:
+        # ----- find closest food -----
+        closest_food = None
+        min_food_dist = float('inf')
+        for f in food:
+            food_center = (f.coords[0] + f.size[0] // 2, f.coords[1] + f.size[1] // 2)
+            dx_f = food_center[0] - child.pos[0]
+            dy_f = food_center[1] - child.pos[1]
+            dist_f = (dx_f**2 + dy_f**2)**0.5
+
+            if dist_f < child.sight and dist_f < min_food_dist:
+                min_food_dist = dist_f
+                closest_food = f
+
+        # ----- decide target -----
+        if closest_food is not None:
+            target = (closest_food.coords[0] + closest_food.size[0] // 2,
+                    closest_food.coords[1] + closest_food.size[1] // 2)
+            stop_distance = 5
+        else:
+            dx = child.speed * random.uniform(-1, 1)
+            dy = child.speed * random.uniform(-1, 1)
+            target = None
+
+        # ----- calculate movement -----
+        if target is not None:
+            dx = target[0] - child.coord[0]
+            dy = target[1] - child.coord[1]
+            distance = (dx**2 + dy**2)**0.5
+
+            if distance > stop_distance:
+                attraction_strength = 5.0
+                dx = (dx / distance) * child.speed * attraction_strength
+                dy = (dy / distance) * child.speed * attraction_strength
+            else:
+                dx = dy = 0  # STOP MOVING
+
+                if closest_food is not None:
+                    food_rect = pygame.Rect(closest_food.coords, closest_food.size)
+                    if food_rect.collidepoint(child.coord): 
+                        child.eaten()
+                        food.remove(closest_food)
+
+        # ----- check gender ----- 
+        if child.gender == 'M':
+            male += 1
+        else:
+            female += 1
+            
+        # ----- update position -----
+        x = min(max(child.coord[0] + dx, rect.left + buffer), rect.right - buffer)
+        y = min(max(child.coord[1] + dy, rect.top + buffer), rect.bottom - buffer)
+        child.coord = (x, y)
+
+        # draw child
+        child.draw(child.color, 10, screen)
+
+    
+    # ----- update day timer -----
+    elapsed_time += dt
+    t_remaining -= dt
+    if t_remaining <= 0:
+        day += 1
+        male = 0
+        female = 0
+
+        # ----- kill parents -----
+        for i in reversed(range(len(parents))):
+            parent = parents[i]
+
+            # kill if could not eat
+            if parent.food_eaten_count < 1:
+                del parents[i]  
+
+        for i in reversed(range(len(children))):
+            child = children[i]
+
+            # kill if could not eat
+            if child.food_eaten_count < 1:
+                del children[i]
+        
+        # ----- generate more food -----
+        if food_to_generate > 10:
+            food_to_generate -= 5
+        else:
+            food_to_generate = 30
+        food = create_food(food_to_generate, rect, buffer=10)
+
+        for parent in parents:
+            print(f'Parent {parent} has eaten {parent.food_eaten_count} food')
+            parent.coord = (random.randint(0, 800), rect.bottom)
+            parent.reset_eaten()
+            parent.mated = False
+            
+        for child in children:
+            print(f'Child {child} has eaten {child.food_eaten_count} food')
+            child.coord = (random.randint(0, 800), rect.top)
+            child.reset_eaten()
+            child.mated = False
+
+        t_remaining = 15
+        elapsed_time = 0
+
 
     # ----- draw table -----
     data = [
         ["Day", "Time", "Male", "Female", "Food"],  # header
-        [day, int(t_remaining), 5, 7, 3],
+        [day, int(t_remaining), male, female, len(food)],
     ]
     table_x, table_y = 1525, 100
     cell_width, cell_height = 75, 40

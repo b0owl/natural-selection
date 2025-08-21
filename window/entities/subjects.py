@@ -17,6 +17,9 @@ class Parent:
         self.set_offspring()
 
         self.gender = random.choice(['M', 'F'])
+        self.mated = False
+
+        self.food_eaten_count = 0
 
 
     def set_offspring(self):
@@ -43,10 +46,19 @@ class Parent:
 
                 if distance <= sight and distance < min_distance:
                     closest_mate = potential_mate
-                    print('Found mate')
                     min_distance = distance
 
         return closest_mate  
+    
+    def has_mated(self):
+        self.mated = True 
+
+    def eaten(self):
+        self.food_eaten_count += 1
+
+    def reset_eaten(self):
+        self.food_eaten_count = 0
+    
 
 
 class Child(Parent):
