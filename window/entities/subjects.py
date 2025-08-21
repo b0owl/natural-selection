@@ -33,7 +33,7 @@ class Parent:
 
     def scan_mates(self, sight, parents):
         closest_mate = None
-        min_distance = float('inf')  # start with "infinite" distance
+        min_distance = float('inf')  # start with infinite distance
 
         for potential_mate in parents:
             if potential_mate is not self and self.gender != potential_mate.gender:
@@ -63,6 +63,8 @@ class Child(Parent):
         self.P2aggression = parent2.aggression
         self.P2mut_rate = parent2.mut_rate
         self.P2pot_offspring = parent2.pot_offspring
+
+        self.gender = random.choice(['M', 'F'])
 
         speed = self.P1speed + self.P2speed
         friendliness = self.P1friendliness + self.P2friendliness

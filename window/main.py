@@ -46,7 +46,7 @@ def create_parents(parents, max_speed, max_friendliess, max_aggersion, max_offsp
  min_mut_rate            -> set to 0.1
  sight (in px)           -> set to 50
 """
-rect = pygame.Rect(50, 100, 1500, 800)
+rect = pygame.Rect(5, 100, 1500, 800)
 parents = create_parents(12, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, rect) # sorry for the magic numbers lmao
 
 def create_children():
@@ -84,7 +84,35 @@ def create_food(amt, rect, buffer=0):
 
 food = create_food(10, rect, buffer=10)
 
-def do(screen):
+day = 1
+t_remaining = 60
+elapsed_time = 0  # tracks elapsed time
+dt = 0
+
+def child_cb(parent1, parent2, screen):
+    child = subjects.Child(parent1, parent2, (0, 255, 0))
+    if child.gender == 'M':
+        child.color = (7, 29, 74)
+    else:
+        child.color = (163, 36, 150)
+    x = parent1.pos[0]
+    y = parent1.pos[1]
+
+    child.draw(child.color, 8, screen)
+    
+    return child
+
+def do(screen):  
+    global dt
+    global day, t_remaining, elapsed_time
+
+    # ----- update day timer -----
+    elapsed_time += dt
+    t_remaining -= dt
+    if t_remaining <= 0:
+        day += 1
+        t_remaining = 60
+        elapsed_time = 0
 
     color = (255, 255, 255)  # white
     buffer = 10
@@ -94,7 +122,7 @@ def do(screen):
     for f in food:
         f.draw(screen)
 
-
+    # ----- update parents -----
     for parent in parents:
         # ----- find closest mate -----
         mate = parent.scan_mates(parent.sight, parents)
@@ -115,16 +143,13 @@ def do(screen):
 
         # ----- decide target -----
         if closest_food is not None:
-            # move toward food
             target = (closest_food.coords[0] + closest_food.size[0] // 2,
                       closest_food.coords[1] + closest_food.size[1] // 2)
             stop_distance = 5
         elif mate is not None:
-            # move toward mate
             target = mate.coord
             stop_distance = 20
         else:
-            # random wandering
             dx = parent.speed * random.uniform(-1, 1)
             dy = parent.speed * random.uniform(-1, 1)
             target = None
@@ -140,8 +165,10 @@ def do(screen):
                 dx = (dx / distance) * parent.speed * attraction_strength
                 dy = (dy / distance) * parent.speed * attraction_strength
             else:
-                dx = dy = 0
-
+                dx = dy = 0 # STOP MOVING
+                for i in range(0, len(parents)-1, 2):
+                    child = child_cb(parents[i], parents[i+1], screen)
+                    child.coord += (10, 10)
                 # eat food if reached
                 if closest_food is not None and closest_food in food:
                     food.remove(closest_food)
@@ -154,40 +181,13 @@ def do(screen):
         # draw parent
         parent.draw(parent.color, 10, screen)
 
-    # ----- update children -----
-    for child in children:
-        dx = child.speed * random.uniform(-1, 1)
-        dy = child.speed * random.uniform(-1, 1)
-        x = min(max(child.coord[0] + dx, rect.left + buffer), rect.right - buffer)
-        y = min(max(child.coord[1] + dy, rect.top + buffer), rect.bottom - buffer)
-        child.coord = (x, y)
-        child.draw(child.color, 8, screen)
-
     # ----- draw table -----
     data = [
-        ["Test", "Test4", "Test5"],  # header
-        ["Test1", 23,      95],
-        ["Test2", 30,      88],
-        ["Test3", 25,      92],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
-        [''     , '',      ''],
+        ["Day", "Time", "Male", "Female", "Food"],  # header
+        [day, int(t_remaining), 5, 7, 3],
     ]
-    table_x, table_y = 1570, 100
-    cell_width, cell_height = 100, 40
+    table_x, table_y = 1525, 100
+    cell_width, cell_height = 75, 40
     font = pygame.font.Font(None, 24)
 
     for i, row in enumerate(data):
@@ -202,6 +202,5 @@ def do(screen):
             text_surf = font.render(str(value), True, (255, 255, 255))
             screen.blit(text_surf, (table_x + j * cell_width + 5, table_y + i * cell_height + 5))
 
-
-
-cwin.startWin(do, 0.1)
+dt = 0.1
+cwin.startWin(do, 0.1)  
