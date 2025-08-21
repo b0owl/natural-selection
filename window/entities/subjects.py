@@ -1,29 +1,52 @@
-import pygame  # type: ignore
+import pygame
 import random
 
 class Parent:
-    def __init__(self, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring):
-        self.coord         =coord
-        self.color         =color
-        self.speed         =speed
-        self.friendliness  =friendliness
-        self.aggression    =aggression
-        self.mut_rate      =mut_rate
-        self.pot_offspring =pot_offspring
+    def __init__(self, sight, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring):
+        self.coord         = coord
+        self.color         = color
+        self.speed         = speed
+        self.friendliness  = friendliness
+        self.aggression    = aggression
+        self.mut_rate      = mut_rate
+        self.pot_offspring = pot_offspring
+        self.sight         = sight
+
+        self.pos = coord 
 
         self.set_offspring()
 
+        self.gender = random.choice(['M', 'F'])
+
+
     def set_offspring(self):
-        # Randomize potential offspring between 0 and the max
         self.pot_offspring = random.randint(0, self.pot_offspring)
 
     def move(self, modifier):
         x, y = self.coord
         dx, dy = modifier
         self.coord = (x + dx, y + dy)
+        self.pos = self.coord 
 
     def draw(self, color, size, screen):
-        pygame.draw.circle(screen, color, self.coord, size)
+        pygame.draw.circle(screen, color, (int(self.coord[0]), int(self.coord[1])), size)
+
+    def scan_mates(self, sight, parents):
+        closest_mate = None
+        min_distance = float('inf')  # start with "infinite" distance
+
+        for potential_mate in parents:
+            if potential_mate is not self and self.gender != potential_mate.gender:
+                dx = self.pos[0] - potential_mate.pos[0]
+                dy = self.pos[1] - potential_mate.pos[1]
+                distance = (dx**2 + dy**2)**0.5  # Euclidean distance
+
+                if distance <= sight and distance < min_distance:
+                    closest_mate = potential_mate
+                    print('Found mate')
+                    min_distance = distance
+
+        return closest_mate  
 
 
 class Child(Parent):
@@ -48,14 +71,16 @@ class Child(Parent):
         pot_offspring = self.P1pot_offspring + self.P2pot_offspring
 
         super().__init__(
+            sight=(parent1.sight + parent2.sight) / 2,  
+            coord=(150, 150),
+            color=color,
             speed=speed,
             friendliness=friendliness,
             aggression=aggression,
             mut_rate=mut_rate,
-            pot_offspring=pot_offspring,
-            color=color,
-            coord=(150, 150)
+            pot_offspring=pot_offspring
         )
+
 
         self.apply_mutations()
 
