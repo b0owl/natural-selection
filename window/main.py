@@ -91,10 +91,10 @@ dt = 0
 
  sorry if this is outdated lol, too lazy to change it whenever i change an arg
 """
+
 parents = create_parents(100, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, 300, rect) # sorry for the magic numbers lmao
-food_to_generate = 200
+food_to_generate = 50
 food = create_food(food_to_generate, rect, buffer=10)
-#children = create_children()
 children = []
 
 def child_cb(parent1, parent2, screen):
@@ -110,9 +110,102 @@ def child_cb(parent1, parent2, screen):
     
     return child
 
+def create_bar_graph(screen, rows, coords, bar_width, max_height, values, scale=1, color=(0, 255, 0), font=None):
+    x_start, y_start = coords
+    
+    # Draw bars
+    for i in range(rows):
+        if i >= len(values):
+            break
+        bar_height = min(values[i] * scale, max_height)
+        rect = pygame.Rect(
+            x_start + i * (bar_width + 5),  # 5 pixels spacing
+            y_start - bar_height,
+            bar_width,
+            bar_height
+        )
+        pygame.draw.rect(screen, color, rect)
+    
+    total_width = rows * bar_width + (rows - 1) * 5
+    border_rect = pygame.Rect(x_start - 2, y_start - max_height - 2, total_width + 4, max_height + 4)
+    pygame.draw.rect(screen, (255, 255, 255), border_rect, 2)  # 2px thick white border
+
+    if font is None:
+        font = pygame.font.SysFont(None, 20)
+    
+    for i in range(0, max_height + 1, max(1, max_height // 5)):
+        label = font.render(str(i), True, (255, 255, 255))
+        screen.blit(label, (x_start - label.get_width() - 5, y_start - i - label.get_height() // 2))
+
+
+def create_line_graph(screen, rows, coords, max_height, values, scale=1, color=(0, 255, 0), avg_speed_line_width=2, font=None):
+    x_start, y_start = coords
+    spacing = 5
+    points = []
+
+    for i in range(rows):
+        if i >= len(values):
+            break
+        x = x_start + i * spacing
+        y = y_start - min(values[i] * scale, max_height)
+        points.append((x, y))
+    
+    if len(points) > 1:
+        pygame.draw.lines(screen, color, False, points, avg_speed_line_width)
+
+    for point in points:
+        pygame.draw.circle(screen, color, point, 1)
+
+    total_width = (rows - 1) * spacing
+    border_rect = pygame.Rect(x_start - 2, y_start - max_height - 2, total_width + 4, max_height + 4)
+    pygame.draw.rect(screen, (255, 255, 255), border_rect, 2)
+
+    if font is None:
+        font = pygame.font.SysFont(None, 20)
+
+    for i in range(0, max_height + 1, max(1, max_height // 5)):
+        label = font.render(str(i), True, (255, 255, 255))
+        screen.blit(label, (x_start - label.get_width() - 5, y_start - i - label.get_height() // 2))
+
+
+
+coordsBar = (1555, 300)   
+bar_width = 20
+max_heightBar = 100
+valuesBar = []
+scaleBar = 1
+
+avg_speed_coords_line = (1555, 420) 
+avg_speed_max_heightline = 100
+avg_speed_values_line = []
+avg_speed_scale_line = 6
+avg_speed_line_width = 1 
+
+avg_speed: int
+
+for i in range(70):
+    avg_speed_values_line.append(0)
+
 def do(screen):  
+    global avg_speed_values_line, valuesBar
+    global avg_speed
     global dt, food_to_generate, food
     global day, t_remaining, elapsed_time
+
+    # ----- initlize graph -----
+    rowsBar = len(valuesBar)
+    rowsLine = len(avg_speed_values_line)
+
+    create_bar_graph(screen, rowsBar, coordsBar, bar_width, max_heightBar, valuesBar, scaleBar, color=(0, 200, 255))
+    create_line_graph(screen, rowsLine, avg_speed_coords_line, avg_speed_max_heightline, avg_speed_values_line, scale=avg_speed_scale_line, color=(0,200,255), avg_speed_line_width=2)
+
+    
+    # write stuff
+    font = pygame.font.Font(None, 12)  
+    text_surface_1 = font.render("AVG SPEED OVER TIMME", True, (255, 255, 255))  # True = anti-alias, color = white
+    x_1, y_1 = 1555, 430 
+    screen.blit(text_surface_1, (x_1, y_1))
+
 
     male = 0
     female = 0
@@ -190,7 +283,6 @@ def do(screen):
                     food.remove(closest_food)
 
 
-
         # ----- update position -----
         x = min(max(parent.coord[0] + dx, rect.left + buffer), rect.right - buffer)
         y = min(max(parent.coord[1] + dy, rect.top + buffer), rect.bottom - buffer)
@@ -198,6 +290,7 @@ def do(screen):
 
         # draw parent
         parent.draw(parent.color, 10, screen)
+
             
     # ----- update children -----
     for child in children:
@@ -257,14 +350,27 @@ def do(screen):
         # draw child
         child.draw(child.color, 10, screen)
 
+    # ----- get avg speed ----- 
+    total_speeds = sum(parent.speed for parent in parents) + sum(child.speed for child in children)
+    total_count = len(parents) + len(children)
+    avg_speed = total_speeds / total_count if total_count > 0 else 0
+    print(avg_speed)
+    print(avg_speed_values_line)
+
     
     # ----- update day timer -----
     elapsed_time += dt
     t_remaining -= dt
-    if t_remaining <= 0:
+    if day == 1 and not getattr(create_line_graph, "_done", False):
+        avg_speed_values_line[0] = total_speeds
+        create_line_graph._done = True
+
+
+    if t_remaining <= 0 or len(food) == 0:
         day += 1
         male = 0
-        female = 0
+        female = 0 
+        avg_speed_values_line[day] = avg_speed
 
         # ----- kill parents -----
         for i in reversed(range(len(parents))):
@@ -289,20 +395,17 @@ def do(screen):
         food = create_food(food_to_generate, rect, buffer=10)
 
         for parent in parents:
-            print(f'Parent {parent} has eaten {parent.food_eaten_count} food')
             parent.coord = (random.randint(0, 800), rect.bottom)
             parent.reset_eaten()
             parent.mated = False
             
         for child in children:
-            print(f'Child {child} has eaten {child.food_eaten_count} food')
             child.coord = (random.randint(0, 800), rect.top)
             child.reset_eaten()
             child.mated = False
 
         t_remaining = 15
         elapsed_time = 0
-
 
     # ----- draw table -----
     data = [

@@ -78,7 +78,7 @@ class Child(Parent):
 
         self.gender = random.choice(['M', 'F'])
 
-        speed = self.P1speed + self.P2speed
+        speed = self.P1speed / self.P2speed
         friendliness = self.P1friendliness + self.P2friendliness
         aggression = self.P1aggression + self.P2aggression
         mut_rate = self.P1mut_rate + self.P2mut_rate
