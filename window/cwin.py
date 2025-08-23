@@ -4,7 +4,7 @@ import time
 pygame.init()
 
 background_color = (0, 0, 0)
-screen = pygame.display.set_mode((900, 900), pygame.RESIZABLE)
+screen = pygame.display.set_mode((0, 0), pygame.NOFRAME | pygame.FULLSCREEN)
 pygame.display.set_caption('nats')  # natural selection
 screen.fill(background_color)
 

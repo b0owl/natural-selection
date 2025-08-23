@@ -2,7 +2,7 @@ import pygame
 import random
 
 class Parent:
-    def __init__(self, sight, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring):
+    def __init__(self, sight, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring, energy):
         self.coord         = coord
         self.color         = color
         self.speed         = speed
@@ -11,6 +11,7 @@ class Parent:
         self.mut_rate      = mut_rate
         self.pot_offspring = pot_offspring
         self.sight         = sight
+        self.energy        = energy
 
         self.pos = coord 
 
@@ -30,6 +31,12 @@ class Parent:
         dx, dy = modifier
         self.coord = (x + dx, y + dy)
         self.pos = self.coord 
+
+        self.energy -= (abs(dx) + abs(dy)) * 0.01 * self.speed
+        if self.energy < 0:
+            self.energy = 0
+            print(f"{self} has died due to lack of energy")
+
 
     def draw(self, color, size, screen):
         pygame.draw.circle(screen, color, (int(self.coord[0]), int(self.coord[1])), size)
@@ -84,6 +91,10 @@ class Child(Parent):
         mut_rate = self.P1mut_rate + self.P2mut_rate
         pot_offspring = self.P1pot_offspring + self.P2pot_offspring
 
+        self.age = 0
+        self.min_age_before_death = 2  
+
+
         super().__init__(
             sight=(parent1.sight + parent2.sight) / 2,  
             coord=(150, 150),
@@ -92,8 +103,10 @@ class Child(Parent):
             friendliness=friendliness,
             aggression=aggression,
             mut_rate=mut_rate,
-            pot_offspring=pot_offspring
+            pot_offspring=pot_offspring,
+            energy=(parent1.energy + parent2.energy) / 2
         )
+
 
 
         self.apply_mutations()
