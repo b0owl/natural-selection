@@ -1,15 +1,16 @@
 import pygame  # type: ignore
+import time 
 
 pygame.init()
 
-background_color = (255, 255, 255)
-screen = pygame.display.set_mode((300, 300))
+background_color = (0, 0, 0)
+screen = pygame.display.set_mode((0, 0), pygame.NOFRAME | pygame.FULLSCREEN)
 pygame.display.set_caption('nats')  # natural selection
 screen.fill(background_color)
 
 running = True
 
-def startWin(do):  # main loop
+def startWin(do, delay=0):  # main loop
     global running
     clock = pygame.time.Clock()
     
@@ -22,3 +23,5 @@ def startWin(do):  # main loop
         do(screen)
         pygame.display.flip()
         clock.tick(60)
+
+        time.sleep(delay)
