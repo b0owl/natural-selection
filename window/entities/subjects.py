@@ -2,7 +2,11 @@ import pygame
 import random
 
 class Parent:
-    def __init__(self, sight, coord, color, speed, friendliness, aggression, mut_rate, pot_offspring, energy):
+    def __init__(self, sight, coord, 
+                 color, speed, friendliness, 
+                 aggression, mut_rate, pot_offspring, 
+                 energy):
+        
         self.coord         = coord
         self.color         = color
         self.speed         = speed
@@ -24,7 +28,7 @@ class Parent:
 
 
     def set_offspring(self):
-        self.pot_offspring = random.randint(0, self.pot_offspring)
+        self.offspring = random.randint(0, self.pot_offspring)
 
     def move(self, modifier):
         x, y = self.coord

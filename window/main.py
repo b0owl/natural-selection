@@ -94,8 +94,12 @@ dt = 0
  sorry if this is outdated lol, too lazy to change it whenever i change an arg
 """
 
-parents = create_parents(50, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, 300, rect, 10, 100) # sorry for the magic numbers lmao
-food_to_generate = 500
+parents_to_gen  = 100
+food_to_generate = 200
+old_food_gen = food_to_generate
+
+
+parents = create_parents(parents_to_gen, 5, 0.3, 0.3, 2, 0.5, 0.1, 300, 300, rect, 10, 100) # sorry for the magic numbers lmao
 food = create_food(food_to_generate, rect, buffer=10)
 children = []
 
@@ -306,6 +310,10 @@ def do(screen):
     x_pop_over_gen, y_pop_over_gen = 1555, 300 
     screen.blit(text_pop_over_gen, (x_pop_over_gen, y_pop_over_gen))
 
+    text_food_over_gen = font.render("FOOD OVER GENERATIONS", True, (106, 160, 247))
+    x_food_over_gen, y_food_over_gen = 1555, 430 
+    screen.blit(text_food_over_gen, (x_food_over_gen, y_food_over_gen))
+
     # ----- counters -----
     male = 0
     female = 0
@@ -366,10 +374,10 @@ def do(screen):
                 dx = dy = 0
                 # mating
                 if mate is not None and parent.gender != mate.gender and not parent.mated and parent.food_eaten_count >= 2:
-                    parent.has_mated()
-                    new_child = child_cb(parent, mate, screen)
-                    children.append(new_child)
-                    parent.coords = (rect.left, random.randint(0, 800))
+                    for i in range(parent.offspring):
+                        parent.has_mated()
+                        new_child = child_cb(parent, mate, screen)
+                        children.append(new_child)
                 # eat food
                 if closest_food is not None and closest_food in food:
                     parent.eaten()
@@ -460,13 +468,12 @@ def do(screen):
 
         i += 1
 
-
     # ----- update day timer -----
     elapsed_time += dt
     t_remaining -= dt
 
     if day == 1 and not d1_graph_done:
-        avg_speed_values_line_daily[1] = avg_speed * 30
+        avg_speed_values_line_daily[1] = avg_speed * 20
         total = len(children) + len(parents)
         values_bar_population_size[1] = total / 10
         food_bar_amount_values[1] = len(food) / 20
@@ -477,7 +484,7 @@ def do(screen):
         male = 0
         female = 0
 
-        avg_speed_values_line_daily[day] = avg_speed * 30
+        avg_speed_values_line_daily[day] = avg_speed * 20
         total = len(children) + len(parents)
 
         values_bar_population_size[day] = total / 10
@@ -495,10 +502,7 @@ def do(screen):
                     del children[i]
 
         # generate more food
-        if food_to_generate > math.floor(food_to_generate / 2):
-            food_to_generate -= math.floor(food_to_generate / 4)
-        else:
-            food_to_generate = 200
+        food_to_generate = random.randint(food_to_generate / 2, food_to_generate)
 
         food = create_food(food_to_generate, rect, buffer=10)
 
